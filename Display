@@ -1,0 +1,100 @@
+package assign3;
+
+import javax.swing.*;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.*;
+import javax.swing.text.Document;
+
+import java.awt.*;
+import java.awt.event.*;
+
+ public class SudokuFrame extends JFrame{
+	
+	protected static JTextArea source; 
+	protected static JTextArea results;
+	protected static JButton check;
+	protected static JCheckBox auto;
+	protected static Sudoku sudoku;
+	 
+	public SudokuFrame() {
+		super("Sudoku Solver");		
+		
+		setLayout(new BorderLayout());
+		source = new JTextArea(15, 20);
+	    source.setBorder(new TitledBorder("Puzzle"));
+	    //handles the auto checkbox -- when it's checked, runs the check function automatically
+	    source.getDocument().addDocumentListener(new DocumentListener(){
+            public void changedUpdate(DocumentEvent arg0){
+            	//do nothing
+            }
+            public void insertUpdate(DocumentEvent arg0){
+               if(auto.isSelected()) checkPressed();
+            }
+
+            public void removeUpdate(DocumentEvent arg0){
+            	//do nothing
+            }
+        });
+	    add(source, BorderLayout.CENTER);	    
+		    
+		results = new JTextArea(15, 20);
+		results.setBorder(new TitledBorder("Solution"));
+		add(results, BorderLayout.EAST);
+		    
+		check = new JButton("Check");
+		check.addActionListener( new ActionListener() {
+		public void actionPerformed(ActionEvent e) {
+				checkPressed();
+			}
+		});
+		
+		JLabel label = new JLabel("Auto Check");
+		
+		auto = new JCheckBox();
+		auto.setSelected(true);
+	
+		//constructs new panel to add the southern region items
+		JPanel southPanel = new JPanel();
+		southPanel.add(check, BorderLayout.WEST);
+		southPanel.add(auto, BorderLayout.CENTER);
+		southPanel.add(label, BorderLayout.EAST);
+		add(southPanel, BorderLayout.SOUTH);
+			
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		pack();
+		setVisible(true);
+		}
+
+	private static void checkPressed(){
+		try{
+			//build the solution String (including number of solutions and time elapsed) and set to display
+			sudoku = new Sudoku(Sudoku.textToGrid(source.getText()));
+			Integer solution = new Integer(sudoku.solve());
+			String display = sudoku.solvedBoard();
+			display += "\n";
+			display += "Number of solutions: ";
+			display += solution.toString();
+			display += "\n";
+			display += "Elapsed: ";
+			display += sudoku.getElapsed();
+			display += " milliseconds";
+			results.setText(display);
+		} catch(Exception e){
+			e.printStackTrace();
+			System.out.println("Parsing problem");
+		}
+	}
+	
+	public static void main(String[] args) {
+		// GUI Look And Feel
+		// Do this incantation at the start of main() to tell Swing
+		// to use the GUI LookAndFeel of the native platform. It's ok
+		// to ignore the exception.
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (Exception ignored) { }
+		
+		SudokuFrame frame = new SudokuFrame();
+	}
+
+}
